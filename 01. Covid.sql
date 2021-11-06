@@ -45,7 +45,7 @@ ORDER BY DeathCount DESC
 
 --BY CONTINENT
 
---Countries with the highest death count per continent
+--Continent with the highest death count 
 SELECT continent, MAX(CAST(total_deaths as int)) AS DeathCount
 FROM PortfolioProject..CovidDeaths$
 WHERE continent is not null
@@ -61,12 +61,10 @@ WHERE continent is not null
 GROUP BY date
 ORDER BY 1,2
 
-
 -- VACCINATIONS
---Total Population vs Total Vaccinations
 
+--Total Population vs Total Vaccinations
 SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, SUM(CAST(v.new_vaccinations as int)) OVER (Partition by d.location Order by d.date) AS RollingPeopleVaccinated
---,(RollingPeopleVaccinated/population)*100
 FROM PortfolioProject..CovidDeaths$ as d
 JOIN PortfolioProject..CovidVaccinations$ as v
     ON d.location = v.location
@@ -74,7 +72,7 @@ JOIN PortfolioProject..CovidVaccinations$ as v
 WHERE d.continent is not null
 ORDER BY 2,3
 
---PHP CTE
+-- Using CTE to perform calculations on Partition By
 WITH PvsV (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
 AS
 (
@@ -85,13 +83,12 @@ JOIN PortfolioProject..CovidVaccinations$ AS v
     ON d.location = v.location
 	and d.date = v.date
 WHERE d.continent is not null
---ORDER BY 2,3
 )
 SELECT*,(RollingPeopleVaccinated/Population)*100 AS RPVPercentage
 FROM PvsV
 
 
---TEMP TABLE
+--Temporary Table
 
 DROP Table if exists #PercentPopulationVaccinated
 CREATE TABLE #PercentPopulationVaccinated
@@ -126,7 +123,6 @@ JOIN PortfolioProject..CovidVaccinations$ AS v
     ON d.location = v.location
 	and d.date = v.date
 WHERE d.continent is not null
---ORDER BY 2,3
  
  SELECT *
  FROM PV
